@@ -4,8 +4,10 @@ set -e
 NAME=${1:-"unnamed"}
 TTL=${2:-1800}
 
-ENV_ID="env-$(date +%s)-$(shasha256sum /dev/urandom | head -c 6 || cat /proc/sys/kernel/random/uuid | tr -d '-' | head -c 6)"
-ENV_ID="env-$(cat /proc/sys/kernel/random/uuid 2>/dev/null | tr -d '-' | head -c 12 || date +%s%N | sha256sum | head -c 12)"
+ENV_ID="env-$(cat /proc/sys/kernel/random/uuid 2>/dev/null | tr -d '-' | head -c 12)"
+if [ -z "$ENV_ID" ] || [ "$ENV_ID" = "env-" ]; then
+  ENV_ID="env-$(date +%s | sha256sum | head -c 12)"
+fi
 
 PORT=$(shuf -i 4000-9000 -n 1)
 CREATED_AT=$(date +%s)

@@ -15,7 +15,7 @@ while true; do
     mkdir -p "logs/${ENV_ID}"
 
     START=$(date +%s%N)
-    HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 5 "http://localhost:${PORT}/health" 2>/dev/null || echo "000")
+    HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 5 "http://${ENV_ID}:80/health" 2>/dev/null || echo "000")
     END=$(date +%s%N)
     LATENCY=$(( (END - START) / 1000000 ))
     TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S')
@@ -30,16 +30,7 @@ while true; do
       if [ "$FAILS" -ge 3 ]; then
         echo "[$TIMESTAMP] $ENV_ID is DEGRADED after $FAILS consecutive failures"
         # Update status in state file
-        python3 -c "
-            import json
-            f = 'envs/${ENV_ID}.json'
-            d = json.load(open(f))
-            d['status'] = 'degraded'
-            import tempfile, os
-            tmp = f + '.tmp'
-            json.dump(d, open(tmp, 'w'))
-            os.replace(tmp, f)
-            "
+        python3 -c "import json,os; f='envs/${ENV_ID}.json'; d=json.load(open(f)); d['status']='degraded'; tmp=f+'.tmp'; json.dump(d,open(tmp,'w')); os.replace(tmp,f)"
       fi
     else
       echo 0 > "$FAIL_FILE"

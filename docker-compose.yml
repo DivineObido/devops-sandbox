@@ -1,8 +1,6 @@
-version: '3.8'
-
 services:
   nginx:
-    build: nginx:alpine
+    image: nginx:alpine
     container_name: sandbox-nginx
     ports:
       - "80:80"
@@ -20,14 +18,18 @@ services:
       - "8000:8000"
     volumes:
       - .:/app
+      - //var/run/docker.sock:/var/run/docker.sock
     working_dir: /app
-    command: python3 platform/api.py
+    command: >
+      sh -c "bash platform/cleanup_daemon.sh &
+             bash monitor/health_poller.sh &
+             python3 platform/api.py"
     networks:
       - sandbox-nginx
     depends_on:
       - nginx
     restart: unless-stopped
-
+  
 networks:
   sandbox-nginx:
     name: sandbox-nginx
