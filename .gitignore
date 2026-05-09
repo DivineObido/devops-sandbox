@@ -2,3 +2,4 @@
 logs/
 envs/
 nginx/conf.d/
+platform/venv
