@@ -1,0 +1,4 @@
+.env
+logs/
+envs/
+nginx/conf.d/
